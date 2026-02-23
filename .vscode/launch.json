@@ -1,0 +1,26 @@
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cmake",
+            "request": "launch",
+            "name": "Debug portfile(s)",
+            "cmakeDebugType": "external",
+            "pipeName": "\\\\.\\pipe\\vcpkg_ext_portfile_dbg",
+            "preLaunchTask": "Debug vcpkg commands"
+        },
+        {
+            "name": "CUDA: Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "preLaunchTask": "CUDA: nvcc build active file",
+            "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "console": "integratedTerminal"
+        }
+    ]
+}

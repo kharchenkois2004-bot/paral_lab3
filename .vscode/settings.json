@@ -1,0 +1,7 @@
+{
+    "C_Cpp.default.includePath": [
+        "C:\\Users\\ilya\\Documents\\ParallelProgramming\\Lab3\\include",
+        "C:\\Program Files\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\include",
+        "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.1\\include"
+    ],
+}
