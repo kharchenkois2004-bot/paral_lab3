@@ -13,6 +13,8 @@ struct LogRecord_a : public ILogRecord {
     int step;
     int xThreads;
     int yThreads;
+    int xBlocks;
+    int yBlocks;
 
     double milliseconds;
 
@@ -20,6 +22,7 @@ struct LogRecord_a : public ILogRecord {
                 unsigned int width, unsigned int height,
                 int threshold, int step,
                 int xThreads, int yThreads,
+                int xBlocks, int yBlocks,
                 double milliseconds
                ) {
         time_t now = time(0);
@@ -33,6 +36,8 @@ struct LogRecord_a : public ILogRecord {
         this->step = step;
         this->xThreads = xThreads;
         this->yThreads = yThreads;
+        this->xBlocks = xBlocks;
+        this->yBlocks = yBlocks;
         this->milliseconds = milliseconds;
     }
 
@@ -55,10 +60,11 @@ struct LogRecord_a : public ILogRecord {
         sprintf_s(content, bufSize,
                   "%sImage: \"%s\"; Resolution: %dx%d;\n"
                   "Threshold: %d; Erosion step: %d;\n"
-                  "Threads: %dx%d; Execution time: %.4f ms;",
+                  "Threads per block: %dx%d; Blocks per grid: %dx%d\n"
+                  "Execution time: %.4f ms;",
                   date, imageName, width, height,
                   threshold, step,
-                  xThreads, yThreads,
+                  xThreads, yThreads, xBlocks, yBlocks,
                   milliseconds);
         return content;
     }

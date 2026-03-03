@@ -30,7 +30,7 @@ int main() {
         "PTSR_10x.jpg"
     };
 
-    const char *inputImage = imageFiles[5];         // Имя изображения
+    const char *inputImage = imageFiles[0];         // Имя изображения
 
     const char *inputDir = "input";                 // Директория с изображения
     const char *outputDir = "output";               // Директория для результатов обработки
@@ -40,9 +40,7 @@ int main() {
     const char *logDir_b = "logs/logs_b";           // Директория с логами программы B
     const char *processMethod = "gauss";            // Способ обработки (для имени выходного файла)
 
-    const int mult = 2;                             // Коэффициент уменьшения
-    const int xThreads = 16;                        // Размерность блока по X
-    const int yThreads = 16;                        // Размерность блока по Y
+    const int mult = 4;                             // Коэффициент уменьшения
 
     const bool DEBUG = false;
 
@@ -58,7 +56,17 @@ int main() {
         printf("Max threads dim Y: %d\n", prop.maxThreadsDim[1]);
         printf("Max threads dim Z: %d\n", prop.maxThreadsDim[2]);
         printf("Multiprocessor count: %d\n", prop.multiProcessorCount);
-    }    
+    }
+    // Размерность блока (кол-во потоков) и размерность сетки (кол-во блоков). Зависят от GPU
+
+    // Произведение X*Y не должно превышать maxThreadsPerBlock (макс кол-во потоков)
+    const int xThreads = 32;                    // Размерность блока (кол-во потоков в блоке) по X
+    const int yThreads = 32;                    // Размерность блока (кол-во потоков в блоке) по Y
+
+    // Произведение X*Y может превышать multiProcessorCount (кол-во SM-блоков)
+    // Но ради эффективности программы лучше не превышать
+    const int xBlocks = 6;                      // Размерность сетки (кол-во блоков в сетке) по X
+    const int yBlocks = 5;                      // Размерность сетки (кол-во блоков в сетке) по X
 
     // Создаем необходимые директории
     _mkdir(inputDir);
@@ -118,8 +126,7 @@ int main() {
     // Кол-во потоков на каждый блок
     dim3 threadsPerBlock(xThreads, yThreads);
     // Кол-во блоков в каждой сетке
-    dim3 blocksPerGrid((width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-                        (height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+    dim3 blocksPerGrid(xBlocks, yBlocks);
 
     // Старт таймера для подсчета времени
     auto timerBegin = chrono::high_resolution_clock::now();    
@@ -159,6 +166,7 @@ int main() {
                           width, height,
                           newWidth, newHeight, mult,
                           xThreads, yThreads,
+                          xBlocks, yBlocks,
                           timerDuration.count());
 
     // Сохраняем лог

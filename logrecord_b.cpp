@@ -15,6 +15,8 @@ struct LogRecord_b : public ILogRecord {
     int mult;
     int xThreads;
     int yThreads;
+    int xBlocks;
+    int yBlocks;
 
     double milliseconds;
 
@@ -23,6 +25,7 @@ struct LogRecord_b : public ILogRecord {
                 int newWidth, int newHeight,
                 int mult,
                 int xThreads, int yThreads,
+                int xBlocks, int yBlocks,
                 double milliseconds
                ) {
         time_t now = time(0);
@@ -39,6 +42,8 @@ struct LogRecord_b : public ILogRecord {
         this->mult = mult;
         this->xThreads = xThreads;
         this->yThreads = yThreads;
+        this->xBlocks = xBlocks;
+        this->yBlocks = yBlocks;
         this->milliseconds = milliseconds;
     }
 
@@ -61,7 +66,8 @@ struct LogRecord_b : public ILogRecord {
         sprintf_s(content, bufSize,
                   "%sImage: \"%s\"; Resolution (source): %dx%d;\n"
                   "Resolution (result): %dx%d; Coefficient: %d;\n"
-                  "Threads: %dx%d; Execution time: %.4f ms;",
+                  "Threads per block: %dx%d; Blocks per grid: %dx%d\n"
+                  "Execution time: %.4f ms;",
                   date, imageName, oldWidth, oldHeight,
                   newWidth, newHeight, mult,
                   xThreads, yThreads,

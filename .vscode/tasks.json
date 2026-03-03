@@ -38,6 +38,10 @@
                 "-I", "C:\\Program Files\\opencv\\build\\include",
                 "-L", "C:\\Program Files\\opencv\\build\\x64\\vc16\\lib",
                 "-l", "opencv_world4120",
+                "-I", "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.1\\include",
+                "-L", "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.1\\lib\\x64",
+                "-l", "OpenCL"
+
             ],
             "options": {
                 "cwd": "${fileDirname}"

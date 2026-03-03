@@ -40,13 +40,11 @@ int main() {
     const char *processMethod = "erosion";          // Способ обработки (для имени выходного файла)
 
     const int threshold = 128;                      // Пороговое значение для интенсивности
-    const int step = 2;                             // Шаг эрозии
-    const int xThreads = 16;                        // Размерность блока по X
-    const int yThreads = 16;                        // Размерность блока по Y
+    const int step = 10;                            // Шаг эрозии
 
-    const bool DEBUG = false;
+    const bool DEBUG = true;
 
-    // Вывод информации о GPU
+    // Вывод информации о GPU. Полезно для расчета размерностей блоков и сеток
     if (DEBUG) {
         int deviceId;
         cudaGetDevice(&deviceId);
@@ -58,7 +56,17 @@ int main() {
         printf("Max threads dim Y: %d\n", prop.maxThreadsDim[1]);
         printf("Max threads dim Z: %d\n", prop.maxThreadsDim[2]);
         printf("Multiprocessor count: %d\n", prop.multiProcessorCount);
-    }    
+    }
+    // Размерность блока (кол-во потоков) и размерность сетки (кол-во блоков). Зависят от GPU
+
+    // Произведение X*Y не должно превышать maxThreadsPerBlock (макс кол-во потоков)
+    const int xThreads = 32;                    // Размерность блока (кол-во потоков в блоке) по X
+    const int yThreads = 32;                    // Размерность блока (кол-во потоков в блоке) по Y
+
+    // Произведение X*Y может превышать multiProcessorCount (кол-во SM-блоков)
+    // Но ради эффективности программы лучше не превышать
+    const int xBlocks = 6;                      // Размерность сетки (кол-во блоков в сетке) по X
+    const int yBlocks = 5;                      // Размерность сетки (кол-во блоков в сетке) по X
 
     // Создаем необходимые директории
     _mkdir(inputDir);
@@ -116,13 +124,19 @@ int main() {
     CHECK_CUDA(cudaMalloc(&d_binary, binSize));
 
     // Копируем imageSize байтов из image.data в d_input (с Host на Device)
-    CHECK_CUDA(cudaMemcpy(d_input, image.data, imageSize, cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(d_input, image.data, imageSize, cudaMemcpyHostToDevice));  
 
     // Кол-во потоков на каждый блок
-    dim3 threadsPerBlock(xThreads, yThreads);
+    dim3 threadsPerBlock(xThreads, yThreads);   
     // Кол-во блоков в каждой сетке
-    dim3 blocksPerGrid((width + threadsPerBlock.x - 1) / threadsPerBlock.x,
-                        (height + threadsPerBlock.y - 1) / threadsPerBlock.y);
+    dim3 blocksPerGrid(xBlocks, yBlocks);
+
+    if(DEBUG) {
+        printf("Threads per block: %dx%d = %d\n"
+               "Blocks per grid: %dx%d = %d\n",
+               threadsPerBlock.x, threadsPerBlock.y, threadsPerBlock.x * threadsPerBlock.y,
+               blocksPerGrid.x, blocksPerGrid.y, blocksPerGrid.x * blocksPerGrid.y);
+    }
 
     // Используется 2 таймера
     // Между операцией бинаризации и эрозии происходит сохранение изображения
@@ -192,6 +206,7 @@ int main() {
                           image.cols, image.rows,
                           threshold, step,
                           xThreads, yThreads,
+                          xBlocks, yBlocks,
                           timerDuration.count());
 
     // Сохраняем лог
