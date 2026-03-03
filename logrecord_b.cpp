@@ -71,6 +71,7 @@ struct LogRecord_b : public ILogRecord {
                   date, imageName, oldWidth, oldHeight,
                   newWidth, newHeight, mult,
                   xThreads, yThreads,
+                  xBlocks, yBlocks,
                   milliseconds);
         return content;
     }
