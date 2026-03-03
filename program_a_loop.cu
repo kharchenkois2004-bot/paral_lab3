@@ -42,6 +42,9 @@ int main() {
     const int threshold = 128;                          // Пороговое значение для интенсивности
     const int step = 10;                                // Шаг эрозии
 
+    const int xThreads = 16;                        // Размерность блока (кол-во потоков в блоке) по X
+    const int yThreads = 16;                        // Размерность блока (кол-во потоков в блоке) по Y
+
     const int iterCount = 5;
 
     const bool DEBUG = false;
@@ -59,16 +62,6 @@ int main() {
         printf("Max threads dim Z: %d\n", prop.maxThreadsDim[2]);
         printf("Multiprocessor count: %d\n", prop.multiProcessorCount);
     }
-    // Размерность блока (кол-во потоков) и размерность сетки (кол-во блоков). Зависят от GPU
-
-    // Произведение X*Y не должно превышать maxThreadsPerBlock (макс кол-во потоков)
-    const int xThreads = 32;                    // Размерность блока (кол-во потоков в блоке) по X
-    const int yThreads = 32;                    // Размерность блока (кол-во потоков в блоке) по Y
-
-    // Произведение X*Y может превышать multiProcessorCount (кол-во SM-блоков)
-    // Но ради эффективности программы лучше не превышать
-    const int xBlocks = 6;                      // Размерность сетки (кол-во блоков в сетке) по X
-    const int yBlocks = 5;                      // Размерность сетки (кол-во блоков в сетке) по X
 
     // Создаем необходимые директории
     _mkdir(inputDir);
@@ -135,7 +128,9 @@ int main() {
 
             // Кол-во потоков на каждый блок
             dim3 threadsPerBlock(xThreads, yThreads);
-            // Кол-во блоков в каждой сетке
+            // Кол-во блоков в каждой сетке            
+            const int xBlocks = (width + threadsPerBlock.x - 1) / threadsPerBlock.x;
+            const int yBlocks = (height + threadsPerBlock.y - 1) / threadsPerBlock.y;
             dim3 blocksPerGrid(xBlocks, yBlocks);
 
             // Используется 2 таймера
